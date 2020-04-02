@@ -2,11 +2,13 @@ package data
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/joho/godotenv"
 )
 
 var DB *gorm.DB
@@ -19,17 +21,17 @@ type Post struct {
 }
 
 func init() {
-	fmt.Println("init.go init")
-	dbHost := os.Getenv("DB_HOST")
-	dbUser := os.Getenv("DB_USER")
-	dbPassword := os.Getenv("DB_Password")
-	dbName := os.Getenv("DB_NAME")
-	connectionString := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbUser, dbName, dbPassword)
-	fmt.Println(connectionString)
+	err := godotenv.Load()
 	if err != nil {
-		fmt.Println(err)
-		//panic(err)
+		log.Fatalf("Error loading .env file. Error: %v", err)
 	}
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+
+	connectionString := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s", dbHost, dbUser, dbName, dbPassword)
+
 	for i := 0; i < 5; i++ {
 		DB, err = gorm.Open("postgres", connectionString) // gorm checks Ping on Open
 		if err == nil {
@@ -39,17 +41,11 @@ func init() {
 		time.Sleep(5 * time.Second)
 	}
 	if err != nil {
-		fmt.Println(err)
-		//panic(err)
+		log.Fatalf("Error opening the db connection. Error= %v", err)
 	}
-
-	DB.Exec(fmt.Sprintf("CREATE DATABASE %s", dbName))
 
 	// create table if it does not exist
 	if !DB.HasTable(&Post{}) {
 		DB.CreateTable(&Post{})
 	}
-
-	testPost := Post{Author: "Dorper", Message: "GoDoRP is Dope"}
-	DB.Create(&testPost)
 }

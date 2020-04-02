@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -119,26 +118,17 @@ func setCors(w http.ResponseWriter) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-func init() {
-	fmt.Println("api.go init")
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file. Error: %v", err)
-	}
-	fmt.Println(os.Getenv("DB_HOST"))
-}
-
 func main() {
 	defer data.DB.Close()
 
 	// add router and routes
 	router := httprouter.New()
 	router.GET("/", indexHandler)
-	router.POST("/posts", createPostHandler)
-	router.GET("/posts/:postId", showPostHandler)
-	router.DELETE("/posts/:postId", deletePostHandler)
-	router.PUT("/posts/:postId", updatePostHandler)
-	router.GET("/posts", indexPostHandler)
+	router.POST("/api/posts", createPostHandler)
+	router.GET("/api/posts/:postId", showPostHandler)
+	router.DELETE("/api/posts/:postId", deletePostHandler)
+	router.PUT("/api/posts/:postId", updatePostHandler)
+	router.GET("/api/posts", indexPostHandler)
 	router.OPTIONS("/*any", corsHandler)
 
 	env := os.Getenv("APP_ENV")
