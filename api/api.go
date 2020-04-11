@@ -132,6 +132,7 @@ func main() {
 	router.OPTIONS("/*any", corsHandler)
 
 	env := os.Getenv("APP_ENV")
+	fmt.Println(env)
 	if env == "production" {
 		log.Println("Running api server in production mode")
 	} else {
